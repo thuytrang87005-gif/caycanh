@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XANH GARDEN</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 flex flex-col min-h-screen">
+
+    <!-- Header Section -->
+    <div class="bg-[#173e33] text-white">
+        <header class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between border-b border-emerald-800/40">
+            <!-- Logo Brand -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.reload()">
+                <div class="text-2xl text-amber-400">🪴</div>
+                <div>
+                    <h1 class="font-extrabold text-xl tracking-wider text-white uppercase leading-none">XANH GARDEN</h1>
+                    <span class="text-[11px] text-emerald-300 font-medium">Nơi đăng bán cây cảnh</span>
+                </div>
+            </div>
+
+            <!-- Header Right Action Area -->
+            <div class="relative flex items-center gap-3" id="headerUserArea">
+                <!-- Nút Giỏ Hàng giữ lại riêng bên ngoài Header -->
+                <button id="btnOpenCart" class="bg-emerald-900/80 hover:bg-emerald-800 border border-emerald-700/50 text-white px-4 py-2.5 rounded-xl transition flex items-center gap-2 text-sm font-semibold shadow-sm">
+                    <i class="fa-solid fa-cart-shopping text-base text-emerald-400"></i>
+                    <span>Giỏ hàng</span>
+                    <span id="cartBadge" class="bg-amber-400 text-gray-900 font-black text-xs px-2 py-0.5 rounded-full">0</span>
+                </button>
+
+                <!-- Trạng thái CHƯA ĐĂNG NHẬP: Nút mở Modal đăng nhập -->
+                <button id="btnConnect" class="bg-[#56c596] hover:bg-[#43b082] text-[#0f2e26] font-bold text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-md transition">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>Đăng nhập</span>
+                </button>
+
+                <!-- Trạng thái ĐÃ ĐĂNG NHẬP: Thẻ Ví & Dropdown Menu xổ xuống -->
+                <div id="userProfileDropdown" class="relative hidden">
+                    <button id="btnUserMenu" onclick="UI.toggleUserDropdown()" class="bg-[#56c596] hover:bg-[#43b082] text-[#0f2e26] font-bold text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-md transition">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span id="walletText">0x000...0000</span>
+                        <i class="fa-solid fa-chevron-down text-xs ml-1 transition-transform duration-200" id="dropdownArrow"></i>
+                    </button>
+
+                    <!-- Khung Dropdown Menu xổ xuống -->
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-3 z-50 text-gray-800 space-y-2">
+                        
+                        <!-- Thẻ thông tin Ví, Mạng & Số dư ETH -->
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 space-y-1.5">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500">Tài khoản:</span>
+                                <span class="font-bold text-gray-800">Ví 1</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500">Địa chỉ ví:</span>
+                                <span id="txtFullAddress" class="font-mono font-bold text-emerald-900">0x000...0000</span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="text-gray-500">Mạng kết nối:</span>
+                                <span class="font-bold text-emerald-800 flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sepolia
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-xs pt-1 border-t border-emerald-200/60">
+                                <span class="text-gray-500">Số dư ví:</span>
+                                <span class="font-bold text-emerald-700" id="txtBalance">0.0000 ETH</span>
+                            </div>
+                        </div>
+
+                        <hr class="border-gray-100">
+
+                        <!-- Các nút chức năng giữ nguyên -->
+                        <button id="btnOpenOrders" class="w-full flex items-center gap-2 p-2.5 hover:bg-emerald-50 rounded-xl text-xs font-bold text-gray-700 transition">
+                            <i class="fa-solid fa-receipt text-emerald-600 w-4"></i>
+                            <span>Lịch sử đơn hàng</span>
+                        </button>
+
+                        <button id="btnOpenModal" class="w-full flex items-center gap-2 p-2.5 hover:bg-emerald-50 rounded-xl text-xs font-bold text-emerald-700 transition">
+                            <i class="fa-solid fa-circle-plus text-emerald-600 w-4"></i>
+                            <span>Đăng bán cây mới</span>
+                        </button>
+
+                        <hr class="border-gray-100">
+
+                        <button onclick="UI.disconnectWallet()" class="w-full flex items-center gap-2 p-2.5 hover:bg-red-50 rounded-xl text-xs font-bold text-red-600 transition">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i>
+                            <span>Ngắt kết nối ví</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section Banner -->
+        <div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+            <div class="md:col-span-2 space-y-3">
+                <span class="inline-block bg-emerald-800/60 text-emerald-300 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-600/40">
+                    Sàn Thương Mại Điện Tử Phi Tập Trung
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white leading-tight">
+                    Chợ Mua Bán Cây Cảnh Bonsai<br>Tích Hợp Smart Contract Ethereum
+                </h2>
+                <p class="text-emerald-100/80 text-sm max-w-xl leading-relaxed">
+                    Bất kỳ nhà vườn hay cá nhân nào cũng có thể tự do niêm yết cây cảnh, giao dịch minh bạch và nhận ETH chuyển trực tiếp tới ví mà không qua trung gian.
+                </p>
+            </div>
+
+            <div class="bg-emerald-900/40 border border-emerald-700/50 rounded-2xl p-5 backdrop-blur-sm grid grid-cols-2 gap-4 text-center">
+                <div class="border-r border-emerald-700/50 pr-2">
+                    <div class="text-xs text-emerald-200 mb-1">Sản phẩm sẵn có</div>
+                    <div id="totalPlantsCount" class="text-3xl font-extrabold text-white">0</div>
+                </div>
+                <div>
+                    <div class="text-xs text-emerald-200 mb-1">Đơn hàng thành công</div>
+                    <div id="soldPlantsCount" class="text-3xl font-extrabold text-emerald-300">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-8 w-full">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <h3 class="text-xl font-bold text-gray-800">Bộ Sưu Tập Bonsai Trên Sàn</h3>
+            <div class="relative w-full sm:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                <input type="text" id="searchInput" placeholder="Tìm tên cây, đặc điểm phong thủy..." 
+                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-emerald-600 shadow-sm bg-white">
+            </div>
+        </div>
+
+        <div id="plantGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+
+    <footer class="border-t border-gray-200 bg-white py-6 text-center text-xs text-gray-400">
+        © 2026 Xanh Garden Bonsai Marketplace. Powered by Ethereum Sepolia Testnet & Ethers.js
+    </footer>
+
+
+    <!-- ==================== HỆ THỐNG MODAL ==================== -->
+
+    <!-- MODAL 1: Chọn Phương Thức Đăng Nhập / Kết Nối -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 justify-center items-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 relative">
+            <button onclick="UI.closeModal('loginModal')" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-14 h-14 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">Đăng Nhập</h3>
+                <p class="text-xs text-gray-400 mt-1">Chọn phương thức truy cập vào Bonsai Marketplace</p>
+            </div>
+
+            <div class="space-y-3">
+                <button id="btnLoginMetaMask" class="w-full border-2 border-emerald-500 hover:bg-emerald-50 p-4 rounded-2xl flex items-center justify-between transition group shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" class="w-8 h-8" alt="MetaMask">
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800 group-hover:text-emerald-700">Ví MetaMask</div>
+                            <div class="text-[11px] text-gray-400">Kết nối nhanh bằng địa chỉ ví Ethereum</div>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300 group-hover:text-emerald-600 transition"></i>
+                </button>
+
+                <button onclick="alert('Tính năng đăng nhập qua OTP Số điện thoại đang phát triển!')" class="w-full border border-gray-200 hover:bg-gray-50 p-4 rounded-2xl flex items-center justify-between transition group opacity-75">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800">Số điện thoại</div>
+                            <div class="text-[11px] text-gray-400">Đăng nhập bằng mã OTP SMS</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded">Sắp có</span>
+                </button>
+
+                <button onclick="alert('Tính năng đăng nhập qua Email / Google đang phát triển!')" class="w-full border border-gray-200 hover:bg-gray-50 p-4 rounded-2xl flex items-center justify-between transition group opacity-75">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div class="text-left">
+                            <div class="font-bold text-sm text-gray-800">Email / Google</div>
+                            <div class="text-[11px] text-gray-400">Đăng nhập bằng tài khoản Google hoặc Email</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded">Sắp có</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Đăng Bán / Chỉnh Sửa Cây Bonsai -->
+    <div id="addPlantModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 justify-center items-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="UI.closeModal('addPlantModal')" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 id="modalPlantTitle" class="text-lg font-bold text-gray-800 mb-4">Đăng Bán Cây Bonsai Mới</h3>
+            
+            <form id="plantForm" class="space-y-4">
+                <input type="hidden" id="plantEditId">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Tên chậu cây *</label>
+                    <input type="text" id="plantName" required placeholder="VD: Bonsai Tùng La Hán" class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:border-emerald-600">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Giá bán (ETH) *</label>
+                        <input type="number" step="0.0001" id="plantPrice" required placeholder="0.01" class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:border-emerald-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Số lượng kho *</label>
+                        <input type="number" id="plantQuantity" min="1" value="1" required class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:border-emerald-600">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">URL Hình ảnh *</label>
+                    <input type="url" id="plantImage" required placeholder="https://images.unsplash.com/..." class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:border-emerald-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Mô tả cây cảnh</label>
+                    <textarea id="plantDesc" rows="3" placeholder="Mô tả tuổi thọ, kích thước, thế cây..." class="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:border-emerald-600"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="UI.closeModal('addPlantModal')" class="px-4 py-2 border rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-50">Hủy</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md">Xác Nhận Đăng</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Giỏ Hàng -->
+    <div id="cartModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 justify-center items-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="UI.closeModal('cartModal')" class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-cart-shopping text-emerald-600"></i> Giỏ Hàng Của Bạn
+            </h3>
+
+            <div id="cartItemsContainer" class="space-y-3 max-h-60 overflow-y-auto mb-4 pr-1"></div>
+
+            <div class="border-t pt-3 space-y-3">
+                <div class="flex justify-between items-center text-sm font-bold">
+                    <span>Tổng thanh toán:</span>
+                    <span id="cartTotalEth" class="text-emerald-700 font-black text-base">0.0000 ETH</span>
+                </div>
+                <button id="btnCheckout" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow-md transition">
+                    Thanh Toán 
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+<!-- MODAL 4: QUẢN LÝ ĐƠN HÀNG -->
+<div id="ordersModal"
+     class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 justify-center items-center p-4">
+
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+
+        <button onclick="UI.closeModal('ordersModal')"
+                class="absolute top-5 right-5 text-gray-400 hover:text-gray-600 text-lg">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <h3 class="text-lg font-bold text-gray-800 mb-5 flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-emerald-600"></i>
+            Quản Lý Đơn Hàng
+        </h3>
+
+        <!-- Hai tab đơn hàng -->
+        <div class="grid grid-cols-2 gap-2 mb-5">
+
+            <button id="btnBuyerOrders"
+                    class="py-3 rounded-xl text-sm font-bold bg-emerald-700 text-white">
+                <i class="fa-solid fa-bag-shopping mr-1"></i>
+                Đơn hàng đã mua
+            </button>
+
+            <button id="btnSellerOrders"
+                    class="py-3 rounded-xl text-sm font-bold bg-gray-100 text-gray-600 hover:bg-emerald-50">
+                <i class="fa-solid fa-store mr-1"></i>
+                Đơn hàng đã bán
+            </button>
+
+        </div>
+
+        <!-- Danh sách đơn mua -->
+        <div id="buyerOrdersSection"
+             class="space-y-4 overflow-y-auto pr-1 flex-1">
+
+            <div id="buyerOrdersContainer" class="space-y-4">
+                <p class="text-center text-gray-400 text-sm py-8">
+                    Chưa có đơn hàng đã mua.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Danh sách đơn bán -->
+        <div id="sellerOrdersSection"
+             class="hidden space-y-4 overflow-y-auto pr-1 flex-1">
+
+            <div id="sellerOrdersContainer" class="space-y-4">
+                <p class="text-center text-gray-400 text-sm py-8">
+                    Chưa có đơn hàng đã bán.
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+
+    <!-- Nạp các file script cấu hình & logic JS -->
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/web3.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
