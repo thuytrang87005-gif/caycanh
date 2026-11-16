@@ -86,5 +86,3 @@ Hệ thống gồm ba thành phần chính:
 Dự án sử dụng mạng Ethereum Sepolia phục vụ thử nghiệm các giao dịch Blockchain. ETH sử dụng trong quá trình giao dịch là ETH thử nghiệm trên Testnet, không phải ETH có giá trị giao dịch thực tế.
 
 ---
-
-**XANH GARDEN – Kết nối người yêu cây, minh bạch hóa giao dịch bằng Blockchain.**
